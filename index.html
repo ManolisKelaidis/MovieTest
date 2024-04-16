@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Movies</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: "Roboto", sans-serif;
+        background-color: #f9f9f9;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .search-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .search-input {
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        transition: border-color 0.3s ease;
+      }
+
+      .search-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .movie-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 200px;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: white;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .poster {
+        width: 150px;
+        height: 220px;
+        border-radius: 5px;
+      }
+
+      .title {
+        margin-top: 10px;
+        font-size: 16px;
+        text-align: center;
+      }
+      a {
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const Card = ({ link, title, poster }) => {
+        return (
+          <div className="card">
+            <a target="_blank" href={`https://www.imdb.com/title/${link}/`}>
+              <img className="poster" src={poster} alt={title} />
+            </a>
+            <div className="title">{title}</div>
+          </div>
+        );
+      };
+
+      const App = () => {
+        const [search, setSearch] = React.useState("");
+        const [movies, setMovies] = React.useState([]);
+
+        const handleSubmit = () => {
+          fetch(
+            `http://www.omdbapi.com/?i=tt3896198&apikey=e5735aa&s=${search}`
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.Search) {
+                setMovies(data.Search.slice(0, 3));
+              } else {
+                setMovies([]);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              setMovies([]);
+            });
+        };
+
+        return (
+          <div className="container">
+            <div className="search-container">
+              <input
+                onChange={(e) => setSearch(e.target.value)}
+                className="search-input"
+                type="text"
+                placeholder="Search for movies..."
+              />
+              <button onClick={handleSubmit} className="search-button">
+                Search
+              </button>
+            </div>
+            <div className="movie-container">
+              {movies.map((movie, index) => (
+                <Card
+                  key={index}
+                  link={movie.imdbID}
+                  title={movie.Title}
+                  poster={movie.Poster}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
